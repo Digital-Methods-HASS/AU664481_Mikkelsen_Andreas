@@ -1,0 +1,32 @@
+---
+title: "Top 10 most northern whisky distilleries in Scotland"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(googlesheets4)
+library(leaflet)
+
+Whisky <- read_tsv("Whisky_distileries - Ark2.tsv")
+```
+
+```{r}
+leaflet() %>% 
+  addTiles() %>% 
+  setView( lng = -5.33, lat = 56.54, zoom = 6 ) %>%  
+  addProviderTiles("Esri.WorldPhysical", group = "Physical") %>% 
+  addProviderTiles("Esri.WorldImagery", group = "Aerial") %>% 
+  addProviderTiles("MtbMap", group = "Geo") %>% 
+  addMarkers(lng = Whisky$Latitude, 
+             lat = Whisky$longitude,
+             popup = Whisky$Name)%>% 
+  
+  addLayersControl(                                
+    baseGroups = c("Geo","Aerial", "Physical"),
+    options = layersControlOptions(collapsed = T))
+
+```
+
+###
+There could be done more, but I ran out of time
