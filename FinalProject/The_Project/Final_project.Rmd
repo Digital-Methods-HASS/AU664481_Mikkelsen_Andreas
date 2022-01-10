@@ -1,0 +1,234 @@
+---
+title: "Final_Project"
+author: "Andreas Emil Mikkelsen"
+date: "10/1/2022"
+output: 
+ html_document:
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## The Excise Act of 1788 and Scottish destilleries
+
+To see the effect of the act on the distilleries of today I'll start by loading in my dataset and look at the map and after that the trend overall of distilleries in Scotland
+
+```{r library}
+library(tidyverse)
+dir.create("data") 
+```
+
+## Load dataset
+
+
+```{r data}
+Scottish_Destilleries <- read_csv("data/Whisky_distileries.csv")
+Highland_line <- read_csv("data/Highlandline.csv")
+```
+
+## map of current distilleries
+
+```{r}
+library(leaflet)
+library(htmlwidgets)
+```
+
+```{r}
+leaflet() %>% 
+  addTiles() %>% 
+  addMarkers(lng = Scottish_Destilleries$Longitude, 
+             lat = Scottish_Destilleries$Latitude,
+             popup = Scottish_Destilleries$Name,
+             clusterOptions = markerClusterOptions()) %>% 
+  addPolylines(lat = Highland_line$Latitude, lng = Highland_line$Longitude, color = "red") %>% 
+  addPopups(lat = Highland_line$Latitude, lng = Highland_line$Longitude, popup = Highland_line$Name)
+  
+  
+```
+As seen in this map, the distilleries of today is fairly evenly placed all over Scotland, with a the western highlands and the lowlands near the border having a bit fewer
+## Destilleries started before 1823
+```{r}
+Old_destilleries <-Scottish_Destilleries %>%
+  filter(Start_year<1823)
+```
+
+```{r}
+leaflet() %>% 
+  addTiles() %>% 
+  addMarkers(lng = Old_destilleries$Longitude, 
+             lat = Old_destilleries$Latitude,
+             popup = Old_destilleries$Name,
+             clusterOptions = markerClusterOptions())%>% 
+  addPolylines(lat = Highland_line$Latitude, lng = Highland_line$Longitude, color = "red")%>% 
+  addPopups(lat = Highland_line$Latitude, lng = Highland_line$Longitude, popup = Highland_line$Name)
+```
+
+
+
+```{r}
+leaflet() %>% 
+  addTiles() %>% 
+  addMarkers(lng = Old_destilleries$Longitude, 
+             lat = Old_destilleries$Latitude,
+             popup = Old_destilleries$Name) %>% 
+  addPolylines(lat = Highland_line$Latitude, lng = Highland_line$Longitude, color = "red")%>% 
+  addPopups(lat = Highland_line$Latitude, lng = Highland_line$Longitude, popup = Highland_line$Name)
+ 
+```
+## Trends in distillery start up
+
+
+
+```{r}
+Distilleries_per_year <- Scottish_Destilleries %>% 
+  group_by(Start_year) %>% 
+  count(Start_year,sort = TRUE)
+
+Distilleries_per_year <- rename(Distilleries_per_year, number_of_distilleries=n)
+
+Distilleries_per_year
+```
+
+
+```{r}
+
+ggplot(data=Distilleries_per_year) + 
+  geom_line(mapping = aes(x = Distilleries_per_year$Start_year, 
+                           y =Distilleries_per_year$number_of_distilleries)) +
+  labs(x = "Year",
+       y = "Number of new destilleries",
+       title = "Number of new destilleries per year")
+```
+
+
+## Trend in destilleries in the diffrent regions
+
+
+
+```{r}
+
+Lowland_destilleries <-Scottish_Destilleries %>%
+  filter(Scottish_Destilleries$Region=='Lowland')
+Highland_destilleries <-Scottish_Destilleries %>%
+  filter(Scottish_Destilleries$Region=='Highland')
+Island_destilleries <-Scottish_Destilleries %>%
+  filter(Scottish_Destilleries$Region=='Island')
+Islay_destilleries <-Scottish_Destilleries %>%
+  filter(Scottish_Destilleries$Region=='Islay')
+Campbelltown_destilleries <-Scottish_Destilleries %>%
+  filter(Scottish_Destilleries$Region=='Campbelltown')
+Speyside_destilleries <-Scottish_Destilleries %>%
+  filter(Scottish_Destilleries$Region=='Speyside')
+```
+
+
+
+
+```{r}
+Distilleries_per_year_Highland <- Highland_destilleries %>% 
+  group_by(Start_year) %>% 
+  count(Start_year,sort = TRUE)
+
+Distilleries_per_year_Highland <- rename(Distilleries_per_year_Highland, number_of_distilleries=n)
+
+Distilleries_per_year_Lowland <- Lowland_destilleries %>% 
+  group_by(Start_year) %>% 
+  count(Start_year,sort = TRUE)
+
+Distilleries_per_year_Lowland <- rename(Distilleries_per_year_Lowland, number_of_distilleries=n)
+
+Distilleries_per_year_Islay <- Islay_destilleries %>% 
+  group_by(Start_year) %>% 
+  count(Start_year,sort = TRUE)
+
+Distilleries_per_year_Islay <- rename(Distilleries_per_year_Islay, number_of_distilleries=n)
+
+Distilleries_per_year_Island <- Island_destilleries %>% 
+  group_by(Start_year) %>% 
+  count(Start_year,sort = TRUE)
+
+Distilleries_per_year_Island <- rename(Distilleries_per_year_Island, number_of_distilleries=n)
+
+Distilleries_per_year_Campbelltown <- Campbelltown_destilleries %>% 
+  group_by(Start_year) %>% 
+  count(Start_year,sort = TRUE)
+
+Distilleries_per_year_Campbelltown <- rename(Distilleries_per_year_Campbelltown, number_of_distilleries=n)
+
+Distilleries_per_year_Speyside <- Speyside_destilleries %>% 
+  group_by(Start_year) %>% 
+  count(Start_year,sort = TRUE)
+
+Distilleries_per_year_Speyside <- rename(Distilleries_per_year_Speyside, number_of_distilleries=n)
+
+```
+
+
+
+```{r}
+Distilleries_per_year_Campbelltown
+Distilleries_per_year_Highland
+Distilleries_per_year_Island
+Distilleries_per_year_Islay
+Distilleries_per_year_Lowland
+Distilleries_per_year_Speyside
+```
+
+
+
+
+```{r}
+
+ggplot(data=Distilleries_per_year_Campbelltown) + 
+  geom_point(mapping = aes(x = Distilleries_per_year_Campbelltown$Start_year, 
+                           y =Distilleries_per_year_Campbelltown$number_of_distilleries)) +
+  labs(x = "Year",
+       y = "Number of new destilleries",
+       title = "Number of new destilleries per year Campbelltown")
+
+ggplot(data=Distilleries_per_year_Highland) + 
+  geom_point(mapping = aes(x = Distilleries_per_year_Highland$Start_year, 
+                           y =Distilleries_per_year_Highland$number_of_distilleries)) +
+  labs(x = "Year",
+       y = "Number of new destilleries",
+       title = "Number of new destilleries per year Highland")
+
+ggplot(data=Distilleries_per_year_Island) + 
+  geom_point(mapping = aes(x = Distilleries_per_year_Island$Start_year, 
+                           y =Distilleries_per_year_Island$number_of_distilleries)) +
+  labs(x = "Year",
+       y = "Number of new destilleries",
+       title = "Number of new destilleries per year Island")
+
+ggplot(data=Distilleries_per_year_Islay) + 
+  geom_point(mapping = aes(x = Distilleries_per_year_Islay$Start_year, 
+                           y =Distilleries_per_year_Islay$number_of_distilleries)) +
+  labs(x = "Year",
+       y = "Number of new destilleries",
+       title = "Number of new destilleries per year Islay")
+
+ggplot(data=Distilleries_per_year_Lowland) + 
+  geom_point(mapping = aes(x = Distilleries_per_year_Lowland$Start_year, 
+                           y =Distilleries_per_year_Lowland$number_of_distilleries)) +
+  labs(x = "Year",
+       y = "Number of new destilleries",
+       title = "Number of new destilleries per year Lowland")
+
+ggplot(data=Distilleries_per_year_Speyside) + 
+  geom_point(mapping = aes(x = Distilleries_per_year_Speyside$Start_year, 
+                           y =Distilleries_per_year_Speyside$number_of_distilleries)) +
+  labs(x = "Year",
+       y = "Number of new destilleries",
+       title = "Number of new destilleries per year Speyside")
+```
+
+
+
+
+
+
